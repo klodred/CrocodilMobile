@@ -11,6 +11,7 @@ import com.example.crocodil.NetworkService.NetworkService
 import com.example.crocodil.Player
 import com.example.crocodil.databinding.FragmentCreateLobbyBinding
 import com.example.crocodil.lobby.WaitLobbyActivity
+import kotlin.concurrent.thread
 
 
 class LobbyConnectDialogFragment : DialogFragment() {
@@ -41,10 +42,18 @@ class LobbyConnectDialogFragment : DialogFragment() {
                 builder.setPositiveButton("Создать",
                     DialogInterface.OnClickListener { dialog, id ->
                         //if (processSettingsLobby()) {
-                        //player.setSettings(mapOf(binding.name.text.toString() to "name",
-                          //  binding.password.text.toString() to "password"))
+
+                        val gameSettings = mapOf("name" to binding.name.text.toString(),
+                            "password" to binding.password.text.toString())
+                        player.name = binding.playerName.text.toString()
                         bindService()
-                        mService?.sendSettings(player)
+                        thread {
+                            mService?.sendSettings(player)
+                            mService?.sendSettings(gameSettings)
+                        }
+
+
+                        //mService?.sendSettings(gameSettings)
                         val randomIntent = Intent(context, WaitLobbyActivity::class.java)
                         randomIntent.putExtra("player", "run")
                         startActivity(randomIntent)
@@ -54,9 +63,19 @@ class LobbyConnectDialogFragment : DialogFragment() {
             } else {
                 builder.setPositiveButton("Подключиться",
                     DialogInterface.OnClickListener { dialog, id ->
-                        //if (processSettingsLobby()) {
-                        player.setSettings(mapOf(binding.name.text.toString() to "name",
-                            binding.password.text.toString() to "password"))
+                        val gameSettings = mapOf("name" to binding.name.text.toString(),
+                            "password" to binding.password.text.toString())
+                        player.name = binding.playerName.text.toString()
+                        bindService()
+                        thread {
+                            mService?.sendSettings(player)
+                            mService?.sendSettings(gameSettings)
+                            val message = mService!!.getResponse()
+                            val myDialogFragment = WarningSettingsDialogFragment(message)
+                            val manager = parentFragmentManager
+                            myDialogFragment.show(manager, "myDialog")
+                        }
+
                         val randomIntent = Intent(context, WaitLobbyActivity::class.java)
                         randomIntent.putExtra("player", "run")
                         startActivity(randomIntent)
@@ -87,6 +106,23 @@ class LobbyConnectDialogFragment : DialogFragment() {
         Intent(context, NetworkService::class.java).also { intent ->
               requireActivity().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
         }
+    }
+}
+
+class WarningSettingsDialogFragment(private val message: String) : DialogFragment() {
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+
+        return activity?.let {
+            val builder = AlertDialog.Builder(it)
+            builder
+                .setMessage(message)
+                .setNegativeButton("Закрыть",
+                    DialogInterface.OnClickListener { dialog, id ->
+                        parentFragmentManager.popBackStack()
+                    })
+            builder.create()
+        } ?: throw IllegalStateException("Activity cannot be null")
     }
 }
 /*

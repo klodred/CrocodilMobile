@@ -4,9 +4,10 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
+import android.util.Log
 import com.example.crocodil.Player
-import com.example.crocodil.Test
 import com.google.gson.Gson
+import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.net.Socket
 import kotlin.concurrent.thread
@@ -14,11 +15,15 @@ import kotlin.concurrent.thread
 class NetworkService: Service() {
     private lateinit var socket: Socket
     private val mBinder: IBinder = MyBinder()
+    private lateinit var writer: ObjectOutputStream
+    private lateinit var reader: ObjectInputStream
 
     override fun onCreate() {
         super.onCreate()
         thread {
             socket = Socket("192.168.0.101", 8080)
+            writer = ObjectOutputStream(socket.getOutputStream())
+            reader = ObjectInputStream(socket.getInputStream())
         }
     }
 
@@ -27,20 +32,22 @@ class NetworkService: Service() {
     }
 
     fun sendSettings(player: Player) {
-        thread {
-            //val selectorManager = ActorSelectorManager(Dispatchers.IO)
-            //val socket = aSocket(selectorManager).tcp().connect("127.0.0.1", 9002)
-            //val sendChannel = socket.openWriteChannel(autoFlush = true)
-            val writer = ObjectOutputStream(socket.getOutputStream())
+            writer.writeObject(Gson().toJson(player))
+    }
 
-            val gson = Gson()
-            //val gsonPretty = GsonBuilder().setPrettyPrinting().create()
-            val tut = Test("Tut #1")
-            val jsonTut: String = gson.toJson(tut)
-            writer.writeObject(jsonTut)
-            //writer.writeInt(25)
-            writer.close()
+    fun sendSettings(gameSett: Map<String, String>) {
+            writer.writeObject(gameSett)
+    }
+
+    fun getResponse(): String {
+        val response = reader.readObject() as String
+        Log.d("RESPONSE", response)
+
+        if (response == "Error") {
+            val errorMessage = reader.readObject() as Pair<*, *>
         }
+
+        return response
     }
 
     inner class MyBinder : Binder() {
@@ -51,3 +58,5 @@ class NetworkService: Service() {
     }
 
 }
+
+

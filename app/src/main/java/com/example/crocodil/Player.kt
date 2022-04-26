@@ -1,9 +1,7 @@
 package com.example.crocodil
 
-import com.example.crocodil.databinding.ActivityWaitLobbiBinding
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
-import java.net.Socket
 
 /*  Admin - создатель комнаты (может распустить лобби). Задает пароль и название комнаты
 
@@ -13,12 +11,18 @@ import java.net.Socket
 
 abstract class Player: Serializable {
     abstract val role: String
-    protected var name: String? = null
-    protected var gameSettings: Map<String, String>? = null
 
+    @SerializedName("name")
+    var name: String? = null
+    //protected var gameSettings: Map<String, String>? = null
+
+    /*
     fun setSettings(value: Map<String, String>) {
         gameSettings = value
     }
+
+     */
+
 
     abstract fun start_game()
     //fun getSerializable() {}
@@ -47,10 +51,10 @@ class Soldier : Player() {
     @SerializedName("role")
     override val role = "soldier"
 
-    lateinit var binding: ActivityWaitLobbiBinding
+    //lateinit var binding: ActivityWaitLobbiBinding
 
     override fun start_game() {
-        val client = Socket("127.0.0.1", 9999)
+        //val client = Socket("127.0.0.1", 9999)
 
         //val output = PrintWriter(client.getOutputStream(), true)
         //val input = BufferedReader(InputStreamReader(client.inputStream))
@@ -58,9 +62,7 @@ class Soldier : Player() {
 
         //output.println("Hello")
         //println("Client receiving [${input.readLine()}]")
-        client.close()
-
-
+        //client.close()
     }
 }
 

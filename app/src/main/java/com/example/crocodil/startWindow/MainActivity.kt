@@ -14,13 +14,11 @@ import com.example.crocodil.NetworkService.NetworkService
 import com.example.crocodil.databinding.ActivityMainBinding
 import com.example.crocodil.databinding.FragmentCreateLobbyBinding
 import com.example.crocodil.startWindow.LobbyConnectDialogFragment
-import java.net.Socket
 
 
 class MainActivity : AppCompatActivity() {
     lateinit var bindingMain: ActivityMainBinding
     lateinit var bindingSettings: FragmentCreateLobbyBinding
-    lateinit var socket: Socket
     var mService: NetworkService? = null
     val mTAG = MainActivity::class.java.simpleName
 
@@ -58,13 +56,23 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.Q)
     fun buttonCreateLobby(view: View) {
         bindService()
-        //startAsServer()
         val fragmentManager = supportFragmentManager
         val newFragment = LobbyConnectDialogFragment()
         val bundle = Bundle()
         val player = Admin()
         bundle.putSerializable("player", player)
-        //bundle.putSerializable("socket", socket)
+        newFragment.arguments = bundle
+        newFragment.show(fragmentManager, "dialog")
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    fun buttonConnectLobby(view: View) {
+        bindService()
+        val fragmentManager = supportFragmentManager
+        val newFragment = LobbyConnectDialogFragment()
+        val bundle = Bundle()
+        val player = Soldier()
+        bundle.putSerializable("player", player)
         newFragment.arguments = bundle
         newFragment.show(fragmentManager, "dialog")
     }
@@ -74,49 +82,7 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.Q)
     fun startAsServer() {
         startService(Intent(this, NetworkService::class.java))
-        //thread {
-          //  socket = Socket("192.168.0.101", 8080)
-        //}
-        //val socket = Socket()
-        //val p = InetAddress.getLocalHost()
-        //val connectivityManager = getSystemService(ConnectivityManager::class.java) as ConnectivityManager
-        //val a = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-        //val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        //val wInfo = wifiManager.connectionInfo
-
-        // Extracting the information from the received connection info
-        //val ipAddress = Formatter.formatIpAddress(wInfo.ipAddress)
-        //Log.d("Network address", ipAddress)
-        //val server = ServerSocket(9999)
-        //server.bind(wInfo.ipAddress)
-        //val socket = server.accept()
-
-        /*
-        if (a != null) {
-            Log.d("network capabilities", "not null")
-            val o = a.transportInfo as WifiInfo
-            val id = o.networkId
-            Log.d("Network address", id.toString())
-        }
-        else {
-            Log.d("network capabilities", "is null")
-        }
-         */
     }
-
-    fun connect_to_lobbi(view: View) {
-        /*
-        val bundle = Bundle()
-        val fragmentManager = supportFragmentManager
-        val newFragment = FireMissilesDialogFragment()
-        bundle.putString("hello", "Hello")
-        newFragment.setArguments(bundle)
-        newFragment.show(fragmentManager, "dialog")
-
-         */
-        val socket = Socket("192.168.0.100", 9999)
-    }
-
 }
 
 
